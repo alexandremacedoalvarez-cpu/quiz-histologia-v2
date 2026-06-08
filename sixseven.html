@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Quiz de Histologia | Revisor Inteligente + 47 questões</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e9eef5 0%, #dce3ec 100%);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .quiz-card {
+            max-width: 800px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .quiz-header {
+            background: #1f2b3c;
+            color: white;
+            padding: 1.2rem 1.8rem;
+        }
+
+        .title {
+            font-size: 1.7rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .badge-area {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            font-size: 0.85rem;
+        }
+
+        .badge {
+            background: #2c3e4e;
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-weight: 500;
+        }
+
+        .score-board {
+            background: #0f1a24;
+            margin-top: 14px;
+            border-radius: 60px;
+            padding: 0.5rem 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quiz-body {
+            padding: 2rem 1.8rem 1.8rem;
+        }
+
+        .pergunta-texto {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #0a1c2a;
+            line-height: 1.3;
+            margin-bottom: 1.8rem;
+            border-left: 5px solid #2c7da0;
+            padding-left: 1rem;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #2c3e4e;
+            font-weight: 500;
+            background: #f0f4f9;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+        }
+
+        .opcoes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 1.5rem 0;
+        }
+
+        .btn-opcao {
+            background: white;
+            border: 2px solid #cfdfed;
+            border-radius: 60px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #1e2f3d;
+            font-family: inherit;
+        }
+
+        .btn-opcao:hover:not(.disabled-opt) {
+            background: #eef3fc;
+            border-color: #2c7da0;
+            transform: scale(0.99);
+        }
+
+        .correto {
+            background: #2e7d64 !important;
+            border-color: #1e5a48 !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(46,125,100,0.3);
+        }
+
+        .incorreto {
+            background: #c2413c !important;
+            border-color: #9a2e2a !important;
+            color: white !important;
+        }
+
+        .disabled-opt {
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .next-btn {
+            background: #2c7da0;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 14px 24px;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .next-btn:hover {
+            background: #1f5e7a;
+            transform: translateY(-2px);
+        }
+
+        .restart-btn {
+            background: #334e68;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            width: auto;
+            transition: 0.2s;
+        }
+
+        .result-area {
+            background: #f8fafd;
+            border-radius: 28px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .dificuldade-item {
+            background: white;
+            border-left: 8px solid #c2413c;
+            padding: 12px 16px;
+            margin: 12px 0;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #6c7e8f;
+            padding: 1rem;
+            border-top: 1px solid #e2edf7;
+        }
+
+        @media (max-width: 550px) {
+            .quiz-body {
+                padding: 1.5rem;
+            }
+            .pergunta-texto {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-card" id="app">
+    <div class="quiz-header">
+        <div class="title">
+            🧠 HistoRevisor 
+            <span style="font-size: 0.9rem; background: #2c4c6c; padding: 4px 12px; border-radius: 50px;">47 questões</span>
+        </div>
+        <div class="badge-area">
+            <span class="badge">📚 3 temas</span>
+            <span class="badge">⚡ revisão ativa</span>
+        </div>
+        <div class="score-board" id="scoreBoard">
+            <span>✅ Acertos: <span id="acertosCount">0</span></span>
+            <span>❌ Erros: <span id="errosCount">0</span></span>
+            <span>📊 Progresso: <span id="progressoTexto">0</span>/<span id="totalPerguntasSpan">0</span></span>
+        </div>
+    </div>
+
+    <div class="quiz-body" id="quizBody">
+        <!-- dinâmico -->
+    </div>
+    <footer>
+        💡 Responda mentalmente → clique na resposta → veja o gabarito → próximo. Relatório final por categoria.
+    </footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // BASE DE PERGUNTAS (47 questões: 32 anteriores + 15 novas)
+    // --------------------------------------------------------------
+    const perguntasDB = [
+        // ========== TECIDO MUSCULAR (12 questões originais + novas) ==========
+        {
+            pergunta: "No citoplasma da fibra muscular estriada esquelética, o retículo endoplasmático liso especializado é chamado de:",
+            opcoes: ["Sarcolema", "Sarcossoma", "Retículo Sarcoplasmático", "Sarcômero"],
+            correta: 2,
+            categoria: "Tecido Muscular",
+            explicacao: "O retículo sarcoplasmático é o REL da célula muscular, responsável pelo armazenamento e liberação de cálcio."
+        },
+        {
+            pergunta: "Qual tipo muscular apresenta contração rápida, forte, descontínua e voluntária, além de células multinucleadas com estriações?",
+            opcoes: ["Músculo Liso", "Músculo Estriado Cardíaco", "Músculo Estriado Esquelético", "Músculo Visceral"],
+            correta: 2,
+            categoria: "Tecido Muscular",
+            explicacao: "Músculo estriado esquelético: contração voluntária, rápida, células cilíndricas longas e multinucleadas."
+        },
+        {
+            pergunta: "A unidade funcional contrátil da miofibrila, delimitada por duas linhas Z, é denominada:",
+            opcoes: ["Sarcômero", "Miofilamento", "Retículo Sarcoplasmático", "Banda H"],
+            correta: 0,
+            categoria: "Tecido Muscular",
+            explicacao: "Sarcômero — unidades repetitivas ao longo da miofibrila, formado por linha Z, banda A, H e M."
+        },
+        {
+            pergunta: "O sistema de túbulos transversos (sistema T) no músculo estriado esquelético tem como principal função:",
+            opcoes: ["Produzir ATP para contração", "Armazenar glicogênio", "Propagar a despolarização da membrana para o interior da fibra", "Sintetizar proteínas contráteis"],
+            correta: 2,
+            categoria: "Tecido Muscular",
+            explicacao: "Os túbulos T transmitem o potencial de ação ao retículo sarcoplasmático, garantindo contração sincrônica."
+        },
+        {
+            pergunta: "Qual característica é exclusiva do Músculo Estriado Cardíaco em relação ao esquelético?",
+            opcoes: ["Presença de sarcômeros", "Contração involuntária e discos intercalares", "Múltiplos núcleos periféricos", "Dependência de acetilcolina na placa motora"],
+            correta: 1,
+            categoria: "Tecido Muscular",
+            explicacao: "Cardíaco tem discos intercalares (complexos juncionais), contração involuntária e contínua."
+        },
+        {
+            pergunta: "O mecanismo de contração muscular pela teoria do deslizamento dos filamentos ocorre quando:",
+            opcoes: ["Os filamentos de miosina encurtam", "Os filamentos de actina deslizam sobre a miosina, encurtando o sarcômero", "O retículo sarcoplasmático remove cálcio", "O sarcolema se despolariza permanentemente"],
+            correta: 1,
+            categoria: "Tecido Muscular",
+            explicacao: "Filamentos finos de actina deslizam sobre os grossos de miosina, reduzindo o sarcômero."
+        },
+        {
+            pergunta: "Os filamentos delgados do sarcômero são compostos principalmente por:",
+            opcoes: ["Miosina II", "Actina, tropomiosina e troponina", "Titina e nebulina", "Queratina e desmina"],
+            correta: 1,
+            categoria: "Tecido Muscular",
+            explicacao: "Filamentos delgados = actina, tropomiosina, troponina; filamentos espessos = miosina."
+        },
+        {
+            pergunta: "A mioglobina presente no sarcoplasma da fibra muscular esquelética tem função semelhante à hemoglobina, sendo responsável por:",
+            opcoes: ["Transportar oxigênio", "Armazenar glicogênio", "Produzir ATP anaeróbico", "Captar cálcio"],
+            correta: 0,
+            categoria: "Tecido Muscular",
+            explicacao: "Mioglobina (análoga à hemoglobina) – reserva e transporte de oxigênio na célula muscular."
+        },
+        {
+            pergunta: "Em relação à regeneração do músculo estriado esquelético, é correto afirmar:",
+            opcoes: ["Não ocorre regeneração, apenas fibrose", "As fibras se reconstituem por mitose e fusão de células satélites (mioblastos)", "Ocorre apenas por hipertrofia", "As células satélites são inexistentes"],
+            correta: 1,
+            categoria: "Tecido Muscular",
+            explicacao: "Regeneração via células satélites (mitose e fusão), podendo ocorrer hiperplasia e hipertrofia."
+        },
+        {
+            pergunta: "No músculo cardíaco, os discos intercalares possuem junções comunicantes (gap junctions) que permitem:",
+            opcoes: ["Adesão mecânica apenas", "Passagem de íons e sincronização da contração", "Ancoragem dos filamentos de actina", "Bloqueio do potencial de ação"],
+            correta: 1,
+            categoria: "Tecido Muscular",
+            explicacao: "Discos intercalares possuem zônulas de aderência, desmossomos e junções comunicantes (acoplamento elétrico)."
+        },
+        {
+            pergunta: "Qual das seguintes estruturas está ausente no músculo liso?",
+            opcoes: ["Cavéolas", "Corpos densos", "Sarcômeros organizados", "Miosina II"],
+            correta: 2,
+            categoria: "Tecido Muscular",
+            explicacao: "Músculo liso não possui sarcômeros organizados, porém tem actina, miosina, corpos densos e cavéolas."
+        },
+        {
+            pergunta: "A organela mitocondrial na célula muscular recebe o nome específico de:",
+            opcoes: ["Sarcossoma", "Retículo sarcoplasmático", "Sarcolema", "Miofibrila"],
+            correta: 0,
+            categoria: "Tecido Muscular",
+            explicacao: "Mitocôndrias → Sarcossoma (nomenclatura especial do tecido muscular)."
+        },
+        // ========== SISTEMA LINFOIDE (10 questões) ==========
+        {
+            pergunta: "Órgãos linfóides primários (centrais) onde os linfócitos amadurecem e sofrem seleção clonal são:",
+            opcoes: ["Baço e Linfonodos", "Timo e Medula Óssea", "Tonsilas e Placas de Peyer", "Baço e Timo"],
+            correta: 1,
+            categoria: "Sistema Linfoide",
+            explicacao: "Timo e medula óssea = primários. Timo: maturação de linfócitos T e deleção de autorreativos."
+        },
+        {
+            pergunta: "No timo, os corpúsculos tímicos típicos da região medular, formados por células epiteliais concêntricas, são chamados de:",
+            opcoes: ["Centros germinativos", "Corpúsculos de Hassall", "Nódulos linfáticos", "Seios medulares"],
+            correta: 1,
+            categoria: "Sistema Linfoide",
+            explicacao: "Corpúsculos de Hassall – característicos da medula tímica."
+        },
+        {
+            pergunta: "Qual órgão linfóide secundário é responsável pela hemocaterese (destruição de hemácias envelhecidas) e filtra o sangue?",
+            opcoes: ["Linfonodo", "Tonsila palatina", "Baço", "Placa de Peyer"],
+            correta: 2,
+            categoria: "Sistema Linfoide",
+            explicacao: "Baço – maior acúmulo de tecido linfóide, defesa e remoção de células velhas (hemocaterese)."
+        },
+        {
+            pergunta: "A zona do linfonodo rica em linfócitos B, com nódulos e centros germinativos, é denominada:",
+            opcoes: ["Paracortical", "Cortical superficial (Córtex externo)", "Medular", "Seio subcapsular"],
+            correta: 1,
+            categoria: "Sistema Linfoide",
+            explicacao: "Córtex externo / superficial contém nódulos linfáticos com centros germinativos (linfócitos B)."
+        },
+        {
+            pergunta: "No baço, a região da polpa branca que envolve a arteríola central e é rica em linfócitos T chama-se:",
+            opcoes: ["Bainha linfática periarterial", "Centro germinativo", "Zona marginal", "Cordão esplênico"],
+            correta: 0,
+            categoria: "Sistema Linfoide",
+            explicacao: "Bainha linfática periarterial (BLP) = linfócitos T; centro germinativo = linfócitos B."
+        },
+        {
+            pergunta: "As tonsilas palatinas (amígdalas) apresentam criptas e são revestidas por epitélio:",
+            opcoes: ["Pavimentoso estratificado queratinizado", "Pseudoestratificado cilíndrico", "Pavimentoso estratificado não queratinizado", "Simples cúbico"],
+            correta: 2,
+            categoria: "Sistema Linfoide",
+            explicacao: "Tonsilas palatinas são revestidas por epitélio pavimentoso estratificado não queratinizado, com criptas."
+        },
+        {
+            pergunta: "O processo pelo qual os linfócitos T imaturos que reagem fortemente contra antígenos próprios são eliminados no timo é chamado:",
+            opcoes: ["Seleção positiva", "Deleção clonal (seleção negativa)", "Expansão clonal", "Ativação por citocinas"],
+            correta: 1,
+            categoria: "Sistema Linfoide",
+            explicacao: "Seleção negativa (deleção clonal) elimina linfócitos autorreativos no timo."
+        },
+        {
+            pergunta: "As vênulas de epitélio alto (VEA) presentes na região paracortical do linfonodo são importantes para:",
+            opcoes: ["Filtração da linfa", "Recirculação dos linfócitos (diapedese)", "Produção de anticorpos", "Destruição de bactérias"],
+            correta: 1,
+            categoria: "Sistema Linfoide",
+            explicacao: "Vênulas do epitélio alto permitem a saída de linfócitos da corrente sanguínea para o paracórtex (recirculação)."
+        },
+        {
+            pergunta: "O tecido linfoide associado às mucosas (MALT) inclui estruturas como:",
+            opcoes: ["Baço e linfonodos", "Placas de Peyer, BALT e GALT", "Timo e medula óssea", "Tonsilas faríngeas apenas"],
+            correta: 1,
+            categoria: "Sistema Linfoide",
+            explicacao: "MALT = placas de Peyer (íleo), BALT (brônquios), GALT (trato gastrointestinal)."
+        },
+        {
+            pergunta: "A barreira hematotímica no timo é formada principalmente por:",
+            opcoes: ["Células epiteliais tímicas e junções oclusivas", "Macrófagos e linfócitos B", "Corpúsculos de Hassall", "Fibroblastos e colágeno"],
+            correta: 0,
+            categoria: "Sistema Linfoide",
+            explicacao: "Barreira hematotímica composta por células epiteliais tímicas e desmossomos, impedindo contato com antígenos."
+        },
+        // ========== SISTEMA TEGUMENTAR (10 questões) ==========
+        {
+            pergunta: "Na epiderme, as células derivadas da crista neural que produzem melanina (fotoproteção) e se localizam no estrato basal são os:",
+            opcoes: ["Queratinócitos", "Células de Langerhans", "Melanócitos", "Células de Merkel"],
+            correta: 2,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Melanócitos: derivados da crista neural, melanossomos, função fotoprotetora."
+        },
+        {
+            pergunta: "Em qual camada da epiderme ocorre a síntese de querato-hialina e formação de grânulos lamelares, sendo mais evidente na pele espessa?",
+            opcoes: ["Estrato Basal", "Estrato Espinhoso", "Estrato Granuloso", "Estrato Lúcido"],
+            correta: 2,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Estrato granuloso: 3-5 camadas, grânulos de querato-hialina e corpos lamelares."
+        },
+        {
+            pergunta: "Qual glândula cutânea apresenta secreção do tipo holócrina, onde a célula se rompe para liberar sebo?",
+            opcoes: ["Glândula sudorípara écrinas", "Glândula sebácea", "Glândula apócrina", "Glândula ceruminosa"],
+            correta: 1,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Glândula sebácea é holócrina, secreta sebo no folículo piloso."
+        },
+        {
+            pergunta: "As células apresentadoras de antígeno presentes na epiderme, principalmente no estrato espinhoso, são os:",
+            opcoes: ["Melanócitos", "Células de Merkel", "Células de Langerhans", "Queratinócitos basais"],
+            correta: 2,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Células de Langerhans – dendríticas, derivadas do sistema monócito-macrófago, função imune (APC)."
+        },
+        {
+            pergunta: "A camada da derme formada por tecido conjuntivo denso não modelado, rica em fibras colágenas, responsável pela resistência, é chamada de:",
+            opcoes: ["Camada papilar", "Camada reticular", "Hipoderme", "Membrana basal"],
+            correta: 1,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Derme reticular = tecido conjuntivo denso não modelado, abaixo da papilar."
+        },
+        {
+            pergunta: "O estrato córneo da epiderme é composto por células anucleadas repletas de queratina, cuja função principal é:",
+            opcoes: ["Fagocitose de microrganismos", "Impermeabilização e proteção mecânica", "Produção de melanina", "Regeneração da epiderme"],
+            correta: 1,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Estrato córneo – barreira física e de permeabilidade devido aos lipídios dos corpos lamelares."
+        },
+        {
+            pergunta: "Qual dos seguintes receptores táteis encapsulados está localizado na derme papilar e é responsável pelo tato fino?",
+            opcoes: ["Disco de Merkel", "Corpúsculo de Meissner", "Bulbo terminal de Krause", "Corpúsculo de Pacini"],
+            correta: 1,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Corpúsculo de Meissner (mecanorreceptor tátil encapsulado) presente nas papilas dérmicas."
+        },
+        {
+            pergunta: "As glândulas sudoríparas écrinas secretam suor através de um processo que NÃO lesa a célula, sendo classificadas como:",
+            opcoes: ["Holócrina", "Apócrina", "Merócrina", "Mesócrina"],
+            correta: 2,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Glândulas écrinas são merócrinas (secreção por exocitose, sem perda de citoplasma)."
+        },
+        {
+            pergunta: "A lúnula, região esbranquiçada na base da unha, corresponde à porção visível da:",
+            opcoes: ["Matriz ungueal", "Leito ungueal", "Eponíquio (cutícula)", "Hiponíquio"],
+            correta: 0,
+            categoria: "Sistema Tegumentar",
+            explicacao: "A lúnula é a parte distal da matriz ungueal, onde ocorre a proliferação celular."
+        },
+        {
+            pergunta: "Os queratinócitos, ao migrarem das camadas basais para o estrato córneo, sofrem um processo denominado:",
+            opcoes: ["Citomorfose (queratinização)", "Apoptose", "Necrose", "Melanogênese"],
+            correta: 0,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Citomorfose – acúmulo de filamentos de queratina, perda de organelas e núcleo até a descamação."
+        },
+        // ========== NOVAS PERGUNTAS (15) – alternativas equilibradas ==========
+        {
+            pergunta: "O tecido muscular estriado esquelético é envolvido por camadas de tecido conjuntivo. O epimísio envolve:",
+            opcoes: ["Cada fibra muscular", "O feixe de fibras (fascículo)", "O músculo inteiro", "O sarcômero"],
+            correta: 2,
+            categoria: "Tecido Muscular",
+            explicacao: "Epimísio envolve todo o músculo; perimísio envolve fascículos; endomísio envolve cada fibra."
+        },
+        {
+            pergunta: "Qual das seguintes células NÃO faz parte da epiderme?",
+            opcoes: ["Célula de Langerhans", "Melanócito", "Fibroblasto", "Célula de Merkel"],
+            correta: 2,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Fibroblastos estão na derme, não na epiderme. As demais são células epidérmicas."
+        },
+        {
+            pergunta: "No linfonodo, a região paracortical (córtex profundo) é rica em linfócitos:",
+            opcoes: ["B", "T CD4+ (auxiliares)", "Plasmócitos", "Células NK"],
+            correta: 1,
+            categoria: "Sistema Linfoide",
+            explicacao: "Paracortical é rica em linfócitos T CD4+ auxiliares, macrófagos e células reticulares."
+        },
+        {
+            pergunta: "A troponina é um complexo proteico presente nos filamentos delgados. Sua função é:",
+            opcoes: ["Ligar-se à miosina", "Liberar cálcio do retículo", "Impedir a ligação actina-miosina na ausência de Ca²⁺", "Produzir ATP"],
+            correta: 2,
+            categoria: "Tecido Muscular",
+            explicacao: "A troponina, com a tropomiosina, bloqueia o sítio de ligação da miosina na actina quando o cálcio está baixo."
+        },
+        {
+            pergunta: "A pele fina (delgada) diferencia-se da pele espessa por:",
+            opcoes: ["Ter estrato lúcido e muitos pelos", "Não ter estrato lúcido e ter folículos pilosos", "Ter epiderme mais espessa", "Não possuir glândulas sudoríparas"],
+            correta: 1,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Pele delgada não possui estrato lúcido, contém pelos, glândulas sebáceas e sudoríparas."
+        },
+        {
+            pergunta: "Os seios esplênicos (sinusoides) do baço localizam-se na:",
+            opcoes: ["Polpa branca", "Bainha linfática periarterial", "Polpa vermelha", "Cápsula"],
+            correta: 2,
+            categoria: "Sistema Linfoide",
+            explicacao: "Polpa vermelha contém seios esplênicos (espaços reticulares) e cordões esplênicos."
+        },
+        {
+            pergunta: "O comando para a contração do músculo estriado esquelético inicia-se na placa motora com a liberação de:",
+            opcoes: ["Noradrenalina", "Acetilcolina", "GABA", "Dopamina"],
+            correta: 1,
+            categoria: "Tecido Muscular",
+            explicacao: "O neurotransmissor acetilcolina é liberado na fenda sináptica da placa motora."
+        },
+        {
+            pergunta: "As células de Merkel, encontradas na camada basal da epiderme, atuam como:",
+            opcoes: ["Células apresentadoras de antígeno", "Mecanorreceptores (tato)", "Produtoras de melanina", "Células de defesa fagocitárias"],
+            correta: 1,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Células de Merkel são mecanorreceptores de adaptação lenta, importantes para o tato."
+        },
+        {
+            pergunta: "No músculo liso, o cálcio necessário para a contração liga-se à:",
+            opcoes: ["Troponina C", "Calmodulina", "Miosina quinase", "Actina"],
+            correta: 1,
+            categoria: "Tecido Muscular",
+            explicacao: "No músculo liso, o Ca²⁺ liga-se à calmodulina, ativando a miosina quinase e permitindo a contração."
+        },
+        {
+            pergunta: "O tecido linfóide associado aos brônquios é conhecido como:",
+            opcoes: ["GALT", "BALT", "MALT", "SALT"],
+            correta: 1,
+            categoria: "Sistema Linfoide",
+            explicacao: "BALT = Bronchus-Associated Lymphoid Tissue (tecido linfóide associado aos brônquios)."
+        },
+        {
+            pergunta: "Os corpúsculos de Pacini, presentes na derme profunda e hipoderme, são responsáveis por detectar:",
+            opcoes: ["Pressão e vibração", "Tato fino", "Dor", "Temperatura"],
+            correta: 0,
+            categoria: "Sistema Tegumentar",
+            explicacao: "Corpúsculos de Pacini são mecanorreceptores encapsulados que respondem a pressão profunda e vibração."
+        },
+        {
+            pergunta: "No músculo cardíaco, as mitocôndrias são abundantes e ocupam cerca de:",
+            opcoes: ["10% do citoplasma", "25% do citoplasma", "40% do citoplasma", "60% do citoplasma"],
+            correta: 2,
+            categoria: "Tecido Muscular",
+            explicacao: "O coração depende muito de ATP aeróbico; as mitocôndrias chegam a ocupar 40% do volume citoplasmático."
+        },
+        {
+            pergunta: "As tonsilas faríngeas (adenoide), quando hipertrofiadas, podem causar:",
+            opcoes: ["Amigdalite", "Obstrução nasal e ronco", "Faringite", "Otite média"],
+            correta: 1,
+            categoria: "Sistema Linfoide",
+            explicacao: "A hipertrofia da tonsila faríngea pode obstruir a passagem nasal e a tuba auditiva, levando a ronco e infecções."
+        },
+        {
+            pergunta: "A união derme-epiderme é reforçada por hemidesmossomos e fibrilas de ancoragem (colágeno VII) que compõem a:",
+            opcoes: ["Membrana basal", "Lâmina lúcida", "Lâmina densa", "Zona reticular"],
+            correta: 0,
+            categoria: "Sistema Tegumentar",
+            explicacao: "A membrana basal (junção dermoepidérmica) contém hemidesmossomos e fibrilas de ancoragem."
+        },
+        {
+            pergunta: "A energia para a contração muscular é fornecida pela hidrólise de ATP pela cabeça da miosina. A enzima envolvida é a:",
+            opcoes: ["ATP sintase", "ATPase de miosina", "Creatina quinase", "Fosfatase"],
+            correta: 1,
+            categoria: "Tecido Muscular",
+            explicacao: "A cabeça da miosina possui atividade ATPásica, clivando ATP para gerar energia e movimento."
+        }
+    ];
+
+    // ------------- estado do quiz -------------
+    let perguntas = [...perguntasDB];
+    let indiceAtual = 0;
+    let respostasUsuario = [];
+    let quizFinalizado = false;
+    let aguardandoProximo = false;
+
+    const appContainer = document.getElementById('quizBody');
+    const acertosSpan = document.getElementById('acertosCount');
+    const errosSpan = document.getElementById('errosCount');
+    const progressoTexto = document.getElementById('progressoTexto');
+    const totalSpan = document.getElementById('totalPerguntasSpan');
+
+    function atualizarPlacar() {
+        let acertos = respostasUsuario.filter(r => r && r.acertou === true).length;
+        let erros = respostasUsuario.filter(r => r && r.acertou === false).length;
+        acertosSpan.innerText = acertos;
+        errosSpan.innerText = erros;
+        let respondidas = respostasUsuario.filter(r => r !== undefined).length;
+        progressoTexto.innerText = `${respondidas}`;
+        totalSpan.innerText = perguntas.length;
+    }
+
+    function gerarRelatorioDificuldades() {
+        const errosPorCategoria = {};
+        const acertosPorCategoria = {};
+        respostasUsuario.forEach(resp => {
+            if (!resp) return;
+            const cat = resp.categoria;
+            if (!errosPorCategoria[cat]) {
+                errosPorCategoria[cat] = 0;
+                acertosPorCategoria[cat] = 0;
+            }
+            if (resp.acertou) acertosPorCategoria[cat]++;
+            else errosPorCategoria[cat]++;
+        });
+        let categoriasAnalise = [];
+        for (let cat in errosPorCategoria) {
+            let total = errosPorCategoria[cat] + acertosPorCategoria[cat];
+            let percErro = total > 0 ? (errosPorCategoria[cat] / total) * 100 : 0;
+            categoriasAnalise.push({
+                categoria: cat,
+                erros: errosPorCategoria[cat],
+                acertos: acertosPorCategoria[cat],
+                percErro: percErro
+            });
+        }
+        categoriasAnalise.sort((a,b) => b.percErro - a.percErro);
+        return categoriasAnalise;
+    }
+
+    function exibirTelaFinal() {
+        const totalPerg = perguntas.length;
+        const respondidas = respostasUsuario.filter(r => r !== undefined).length;
+        const acertos = respostasUsuario.filter(r => r && r.acertou).length;
+        const erros = totalPerg - acertos;
+        const desempenhoPercent = totalPerg > 0 ? Math.round((acertos/totalPerg)*100) : 0;
+        const dificuldades = gerarRelatorioDificuldades();
+        
+        let htmlFinal = `
+            <div class="result-area">
+                <h2 style="color:#1f2b3c; margin-bottom: 12px;">📋 Relatório final - ${totalPerg} questões</h2>
+                <p style="font-size:1.2rem; font-weight:bold;">✅ ${acertos} acertos &nbsp;|&nbsp; ❌ ${erros} erros</p>
+                <p style="margin: 5px 0;">🎯 Aproveitamento: ${desempenhoPercent}% (${respondidas}/${totalPerg} respondidas)</p>
+                <hr style="margin: 18px 0; border-color:#dce5f0;">
+                <h3>🔍 Áreas com maior dificuldade:</h3>
+        `;
+        if (dificuldades.length === 0 || erros === 0) {
+            htmlFinal += `<p style="background:#e0f2e9; padding:12px; border-radius: 24px;">✨ Parabéns! Nenhum erro registrado. Domínio excelente! ✨</p>`;
+        } else {
+            for (let item of dificuldades) {
+                if (item.erros > 0) {
+                    htmlFinal += `
+                        <div class="dificuldade-item">
+                            <strong>📌 ${item.categoria}</strong><br>
+                            ❌ ${item.erros} erro(s) | ✅ ${item.acertos} acerto(s)<br>
+                            <span style="font-size:0.85rem; color:#c2413c;">⚠️ Revisar conceitos: ${item.categoria}</span>
+                        </div>
+                    `;
+                } else {
+                    htmlFinal += `
+                        <div class="dificuldade-item" style="border-left-color: #2e7d64;">
+                            <strong>📗 ${item.categoria}</strong> — domínio consolidado (0 erros)
+                        </div>
+                    `;
+                }
+            }
+        }
+        htmlFinal += `
+                <button class="restart-btn" id="btnReiniciar">🔄 Refazer o quiz completo (${totalPerg} questões)</button>
+                <p style="margin-top: 20px; font-size:0.85rem;">💡 Dica: foque nas áreas com mais erros usando os PDFs de origem.</p>
+            </div>
+        `;
+        appContainer.innerHTML = htmlFinal;
+        const restartBtn = document.getElementById('btnReiniciar');
+        if (restartBtn) restartBtn.addEventListener('click', () => reiniciarQuiz());
+        quizFinalizado = true;
+    }
+
+    function validarResposta(botaoClicado, indiceEscolhido) {
+        if (aguardandoProximo) return;
+        const questao = perguntas[indiceAtual];
+        const isCorreto = (indiceEscolhido === questao.correta);
+        
+        respostasUsuario[indiceAtual] = {
+            acertou: isCorreto,
+            categoria: questao.categoria,
+            pergunta: questao.pergunta,
+            escolha: indiceEscolhido,
+            correta: questao.correta
+        };
+        
+        const allBtns = document.querySelectorAll('.btn-opcao');
+        allBtns.forEach((btn, idx) => {
+            btn.classList.add('disabled-opt');
+            btn.style.pointerEvents = 'none';
+            if (idx === questao.correta) btn.classList.add('correto');
+            if (idx === indiceEscolhido && !isCorreto) btn.classList.add('incorreto');
+        });
+        
+        const feedbackMsg = document.createElement('div');
+        feedbackMsg.style.marginTop = '12px';
+        feedbackMsg.style.padding = '8px';
+        feedbackMsg.style.borderRadius = '30px';
+        feedbackMsg.style.backgroundColor = isCorreto ? '#e0f2e9' : '#ffe6e5';
+        feedbackMsg.style.fontSize = '0.85rem';
+        feedbackMsg.style.textAlign = 'center';
+        feedbackMsg.innerText = isCorreto ? '✅ Correto! ' + questao.explicacao : `❌ Incorreto. Resposta certa: ${questao.opcoes[questao.correta]}. ${questao.explicacao}`;
+        const containerPai = document.querySelector('.opcoes-container');
+        const existingMsg = document.querySelector('.feedback-instant');
+        if(existingMsg) existingMsg.remove();
+        feedbackMsg.classList.add('feedback-instant');
+        containerPai.after(feedbackMsg);
+        
+        aguardandoProximo = true;
+        const nextDynamic = document.getElementById('dynamicNextBtn');
+        if(nextDynamic) nextDynamic.style.display = 'block';
+        atualizarPlacar();
+    }
+    
+    function mostrarPergunta() {
+        if (indiceAtual >= perguntas.length) {
+            exibirTelaFinal();
+            return;
+        }
+        const q = perguntas[indiceAtual];
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'progress-info';
+        progressDiv.innerHTML = `<span>📌 ${q.categoria}</span><span>Questão ${indiceAtual+1} de ${perguntas.length}</span>`;
+        
+        const perguntaDiv = document.createElement('div');
+        perguntaDiv.className = 'pergunta-texto';
+        perguntaDiv.innerText = `${indiceAtual+1}. ${q.pergunta}`;
+        
+        const opcoesContainer = document.createElement('div');
+        opcoesContainer.className = 'opcoes-container';
+        
+        q.opcoes.forEach((texto, idx) => {
+            const btn = document.createElement('button');
+            btn.innerText = `${String.fromCharCode(65+idx)}. ${texto}`;
+            btn.classList.add('btn-opcao');
+            btn.addEventListener('click', () => validarResposta(btn, idx));
+            opcoesContainer.appendChild(btn);
+        });
+        
+        let nextBtn = document.createElement('button');
+        nextBtn.innerText = '➡️ PRÓXIMA PERGUNTA';
+        nextBtn.classList.add('next-btn');
+        nextBtn.style.display = 'none';
+        nextBtn.id = 'dynamicNextBtn';
+        nextBtn.addEventListener('click', () => {
+            if (!aguardandoProximo) return;
+            indiceAtual++;
+            aguardandoProximo = false;
+            renderizarTelaAtual();
+        });
+        
+        appContainer.innerHTML = '';
+        appContainer.appendChild(progressDiv);
+        appContainer.appendChild(perguntaDiv);
+        appContainer.appendChild(opcoesContainer);
+        appContainer.appendChild(nextBtn);
+        aguardandoProximo = false;
+    }
+    
+    function renderizarTelaAtual() {
+        if (indiceAtual < perguntas.length) mostrarPergunta();
+        else exibirTelaFinal();
+    }
+    
+    function reiniciarQuiz() {
+        indiceAtual = 0;
+        respostasUsuario = [];
+        aguardandoProximo = false;
+        quizFinalizado = false;
+        atualizarPlacar();
+        renderizarTelaAtual();
+    }
+    
+    function init() {
+        totalSpan.innerText = perguntas.length;
+        atualizarPlacar();
+        renderizarTelaAtual();
+    }
+    init();
+</script>
+</body>
+</html>
